@@ -110,20 +110,8 @@ class Dataset():
         if not self.test_mode:
             self.clear_trush()
 
-        if shuffle:
-            self.logger.info("Shuffle the extracted dataset.")
-            lines = []
-            with open(prepared_file_path, encoding="utf-8") as f:
-                lines = f.readlines()
-            random.shuffle(lines)
-            with open(prepared_file_path, "w", encoding="utf-8") as f:
-                f.writelines(lines)
-
-        # make sample file
-        self.make_samples(prepared_file_path, sample_count)
-
-        # split to train & test
-        self.train_test_split(prepared_file_path, test_size)
+        self.make_and_split_samples(
+            prepared_file_path, shuffle, test_size, sample_count)
 
         if not self.test_mode:
             self.clear_trush()
@@ -329,6 +317,22 @@ class Dataset():
             lines = [ln.replace("\t", " ").strip() for ln in lines]
             fs = [" ".join(lines)]
         return fs
+
+    def make_and_split_samples(self, original_file_path, shuffle, test_size, sample_count):
+
+        if shuffle:
+            self.logger.info("Shuffle the extracted dataset.")
+            with open(original_file_path, encoding="utf-8") as f:
+                lines = f.readlines()
+            random.shuffle(lines)
+            with open(original_file_path, "w", encoding="utf-8") as f:
+                f.writelines(lines)
+
+        # make sample file
+        self.make_samples(original_file_path, sample_count)
+
+        # split to train & test
+        self.train_test_split(original_file_path, test_size)
 
     def train_test_split(self, original_file_path, test_size):
         if test_size < 0 or test_size > 1:
